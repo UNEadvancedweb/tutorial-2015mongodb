@@ -1,4 +1,4 @@
-@(matches: Boolean)
+@(beagles: Int, found: Int)
 
 <!DOCTYPE html>
 <html>
@@ -8,17 +8,7 @@
 </head>
 <body>
 
-@if(matches) {
-  <h1>Yes, it matched!</h1>
-} else {
-  <h2>Noo, that wasn't the password</h2>
-}
-
-<h2>Check a password matches the last one</h2>
-<form action="matches">
-    <input type="password" name="pw" />
-    <button type="submit">Check</button>
-</form>
+  You found @found of @beagles beagles.
 
 </body>
 </html>

@@ -1,16 +1,21 @@
-@()
+@(indexes:Array[Int])
 
 <!DOCTYPE html>
+
 <html>
 <head lang="en">
+    <meta name="referrer" content="no-referrer">
     <meta charset="UTF-8">
     <title></title>
 </head>
 <body>
 
-<h1>Encrypt a password:</h1>
-<form action="encrypt">
-    <input type="password" name="pw" />
+<h1>Tick all the beagles:</h1>
+<!-- TODO: This form probably has the wrong method... -->
+<form action="captcha" >
+    <!--
+      TODO: For each index in the array, show a checkbox with the value of the index, and the relevant img
+    -->
     <button type="submit">Submit</button>
 </form>
 
