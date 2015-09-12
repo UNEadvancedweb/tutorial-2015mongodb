@@ -84,8 +84,12 @@ public class UserService {
         throw new NotImplementedException();
     }
 
-    protected static void save(User u) {
-        // TODO: You need to implement this
-        throw new NotImplementedException();
+    protected void insert(User u) {
+        getChitterCollection().insertOne(userToBson(u));
     }
+
+    protected void update(User u) {
+        getChitterCollection().updateOne(new Document("_id", new ObjectId(u.getId())), userToBson(u));
+    }
+
 }

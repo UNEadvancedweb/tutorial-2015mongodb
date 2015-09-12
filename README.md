@@ -79,9 +79,15 @@ protected static User userFromBson(Document d) {
 }
 ```
 
+
 ### Saving users
 
-Once you can serialise Users, you can save them. I recommend starting with changing the `UserService.registerUser`
+Once you can serialise Users, you can save them. I've added methods `UserService.insert` and `UserService.update` to 
+help with this.
+
+### Migrating the rest to MongoDB
+
+Now you need to modify the `UserService` to use the database. I recommend starting with changing the `UserService.registerUser`
 method -- change it to save the user in the database. Then try it, and using `mongo` at the command line, check that
 the user really turned up in the database
 
@@ -90,9 +96,17 @@ use "comp391_username"
 db.chitterUser.find()
 ```
 
-### Migrating the rest to MongoDB
-
 Now that you've done this, you should migrate the rest of the `UserService` class to use the database instead of an
 in-memory data structure.
 
 One you're done, check that you can still log in, log out, and remote log out.
+
+** Something to remember **
+
+While we were working in memory, we pushed users into the session using `User.pushSession`. But the Java `User` objects
+are now transient -- the data is persisted by putting it into the DB, not by hanging onto the object between requests.
+
+So, you're going to need to put a method into `UserService` that pushes a `Session` into the `User` in the database. 
+This could work by pushing it into the `User` Java object, and then calling `UserService.update` to save the object. Or
+you could do an update query directly on the database entry.
+
