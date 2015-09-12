@@ -7,10 +7,11 @@ POST    /matches                    controllers.Application.matches()
 
 # Added for our user registration
 GET     /login                      controllers.UserController.loginView()
+GET     /sessions                   controllers.UserController.sessionsView()
 GET     /register                   controllers.UserController.registerView()
 POST    /login                      controllers.UserController.doLogin()
 POST    /register                   controllers.UserController.doRegister()
-
+POST    /remoteLogout               controllers.UserController.doRemoteLogout()
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)

@@ -35,6 +35,10 @@ public class UserController extends Controller {
         return ok(views.html.application.register.render(null));
     }
 
+    public static Result sessionsView() {
+        return ok(views.html.application.sessions.render(getUserService().getUserFromSession(getSessionId())));
+    }
+
     public static Result doLogin() {
         String sessionId = getSessionId();
         String email;
@@ -105,4 +109,21 @@ public class UserController extends Controller {
         return ok(views.html.application.login.render(null));
     }
 
+    public static Result doRemoteLogout() {
+        String sessionId = getSessionId();
+        String toRemove;
+
+        try {
+            toRemove = request().body().asFormUrlEncoded().get("remove")[0];
+        } catch (Exception e) {
+            return badRequest(views.html.application.login.render("Session to remove could not be found in the request"));
+        }
+
+        User u = getUserService().getUserFromSession(sessionId);
+        if (u != null) {
+            u.removeSession(toRemove);
+        }
+
+        return redirect("/sessions");
+    }
 }

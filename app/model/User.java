@@ -1,5 +1,6 @@
 package model;
 
+import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class User {
@@ -39,6 +40,11 @@ public class User {
      */
     public boolean hasSession(String sessionId) {
         return activeSessions.containsKey(sessionId);
+    }
+
+    public Session[] getSessions() {
+        Collection<Session> values = activeSessions.values();
+        return values.toArray(new Session[values.size()]);
     }
 
     /**
