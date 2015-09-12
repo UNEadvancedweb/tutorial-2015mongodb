@@ -20,8 +20,8 @@ public class UserController extends Controller {
      */
     protected static String getSessionId() {
         String id = session(SESSIONVAR);
-        if (id == null) {
-            id = java.util.UUID.randomUUID().toString();
+        if (!getUserService().isValidId(id)) {
+            id = getUserService().allocateId();
             session(SESSIONVAR, id);
         }
         return id;
@@ -60,6 +60,7 @@ public class UserController extends Controller {
         User u = getUserService().getUser(email, password);
         if (u != null) {
             u.pushSession(new Session(sessionId, request().remoteAddress(), System.currentTimeMillis()));
+            getUserService().update(u);
             return redirect("/");
         } else {
             return forbidden(views.html.application.login.render("Wrong email address or password"));
@@ -85,7 +86,7 @@ public class UserController extends Controller {
         }
 
         // Create a new user object
-        User u = new User(java.util.UUID.randomUUID().toString(), email, BCrypt.hashpw(password, BCrypt.gensalt()));
+        User u = new User(getUserService().allocateId(), email, BCrypt.hashpw(password, BCrypt.gensalt()));
 
         // Try to register them
         try {
@@ -123,6 +124,7 @@ public class UserController extends Controller {
         if (u != null) {
             u.removeSession(toRemove);
         }
+        getUserService().update(u);
 
         return redirect("/sessions");
     }
