@@ -88,8 +88,8 @@ public class UserService {
         getChitterCollection().insertOne(userToBson(u));
     }
 
-    protected void update(User u) {
-        getChitterCollection().updateOne(new Document("_id", new ObjectId(u.getId())), userToBson(u));
+    public void update(User u) {
+        getChitterCollection().replaceOne(new Document("_id", new ObjectId(u.getId())), userToBson(u));
     }
 
 }

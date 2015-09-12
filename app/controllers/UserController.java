@@ -91,7 +91,7 @@ public class UserController extends Controller {
         try {
             getUserService().registerUser(u);
         } catch (Exception ex) {
-            return badRequest(views.html.application.login.render(ex.getMessage()));
+            return badRequest(views.html.application.register.render(ex.getMessage()));
         }
 
         // Log them in
