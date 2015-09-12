@@ -53,9 +53,14 @@ protected MongoCollection<Document> getChitterCollection() {
 ### Serialising to BSON
 
 The next thing we need is a method that can translate the `User` class to BSON and back, to save it in the database.
+
 I recommend changing how the ID is allocated -- at the moment, we've allocated a Java UUID and stored it as a String in
 the ID field. If instead, you generate BSON ObjectIDs, you should still be able to hold them as Strings in Java, but they
-will be convertible to ObjectIds to store in the database.
+will be convertible to ObjectIds to store in the database. In `UserService`, expose a method to allocate IDs, as you'll
+probably also want to use an ObjectId for the session key.
+
+**NB:** If you do change to ObjectIDs, clear the cookie from your browser -- otherwise you'll still have a Java UUID as
+your session key, and they do not translate into ObjectIds happily!
 
 (If you're stuck, peek at the solution!)
 
