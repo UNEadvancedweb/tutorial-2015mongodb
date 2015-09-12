@@ -40,8 +40,16 @@ public class UserService {
         return null;
     }
 
+    /**
+     * Get the user who is logged in with this session, if there is one
+     */
     public User getUserFromSession(String sessionId) {
-        throw new IllegalArgumentException("Not implemented yet");
+        for (User u : table.values()) {
+            if (u.hasSession(sessionId)) {
+                return u;
+            }
+        }
+        return null;
     }
 
 }
