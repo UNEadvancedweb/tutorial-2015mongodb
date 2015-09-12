@@ -58,7 +58,7 @@ public class Captcha {
     /**
      * Whether a photo selected by the user was in the "yes" set
      */
-    public boolean isCorrect(int idx) {
+    public static boolean isCorrect(int idx) {
         return idx >= 0 && idx < yesPhotos.length;
     }
 

@@ -11,8 +11,16 @@
 <body>
 
 <h1>Tick all the beagles:</h1>
-<!-- TODO: This form probably has the wrong method... -->
-<form action="captcha" >
+
+<form action="matches" method="POST">
+    @for(idx <- indexes) {
+      <div>
+        <input name="sent" value="@idx" type="hidden" />
+        <input name="beagle" value="@idx" type="checkbox" />
+        <img src="@model.Captcha.getPhoto(idx)" style="max-width: 400px; max-height: 200px;" />
+      </div>
+    }
+
     <!--
       TODO: For each index in the array, show a checkbox with the value of the index, and the relevant img
     -->
