@@ -7,5 +7,6 @@ scalaVersion := "2.11.6"
 lazy val root = (project in file(".")).enablePlugins(PlayJava)
 
 libraryDependencies ++= Seq(
-  "org.mindrot" % "jbcrypt" % "0.3m"
+  "org.mindrot" % "jbcrypt" % "0.3m",
+  "org.mongodb" % "mongodb-driver" % "3.0.2"
 )

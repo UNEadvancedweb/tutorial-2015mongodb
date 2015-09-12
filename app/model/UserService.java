@@ -1,12 +1,33 @@
 package model;
 
+import com.mongodb.MongoClient;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import org.bson.BsonWriter;
+import org.bson.Document;
 import org.mindrot.jbcrypt.BCrypt;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
 
 import java.util.concurrent.ConcurrentHashMap;
 
 public class UserService {
 
     public static final UserService instance = new UserService();
+
+    protected MongoClient mongoClient;
+    protected UserService() {
+        mongoClient = new MongoClient("127.0.0.1", 27017);
+    }
+
+    protected MongoDatabase getDB() {
+        // TODO: Change your database name, to avoid clashing with others on turing
+        return mongoClient.getDatabase("comp391_yourusername");
+    }
+
+    protected MongoCollection<Document> getChitterCollection() {
+        return getDB().getCollection("chitterUser");
+    }
 
     /**
      * This stands in for our database at the moment
@@ -52,4 +73,19 @@ public class UserService {
         return null;
     }
 
+    protected static Document userToBson(User u) {
+        // TODO: You need to implement this
+        Document d = new Document();
+        throw new NotImplementedException();
+    }
+
+    protected static User userFromBson(Document d) {
+        // TODO: You need to implement this
+        throw new NotImplementedException();
+    }
+
+    protected static void save(User u) {
+        // TODO: You need to implement this
+        throw new NotImplementedException();
+    }
 }

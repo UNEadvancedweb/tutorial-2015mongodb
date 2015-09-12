@@ -1,183 +1,98 @@
-## Tutorial 4: User management
+## Tutorial wk9: MongoDB
 
-We'll build this functionality into the web project you were working on in last week's tutorial. (This tutorial repo starts with last week's solution).
+The starting point for this tutorial is the solution to the user management tutorial.
 
-### Create the domain class
+In that tutorial, we had a `UserService` that stored user data in memory. In this tutorial, we'll put that into the 
+database.
 
-I'd encourage you to think of a web system as a concurrent server program that communicates over HTTP -- in other words, start by developing a good base in the programming language you are using and then wire up controller methods to it. (Rather than just thinking of a web system as a collection of controller methods.)
+As we're getting quite late into term, the solution will be posted immediately -- you can have a look at what you 
+need to do by comparing the `master` branch with the `solution` branch. I recommend checking out the `master` branch,
+and occasionally looking at the `solution` branch on github.com when you are stuck.
 
-As we're working with user management in this tutorial, let's start by defining a `User` class in our app's `model` package.
+### Adding the driver
 
-Something like...
-
-```java
-public class User {
-
-   String id;
-
-   String email;
-   
-   String hash;
-   
-   public User(String id, String email, String hash) {
-     this.id = id;
-     this.email = email;
-     this.hash = hash;
-   }
-   
-   public String getId() {
-     return this.id;
-   }
-
-   public String getEmail() {
-     return this.email;
-   }
-   
-   public String getHash() {
-     return this.hash;
-   }
-
-}
-```
-
-### Singleton service
-
-Now let's create the user manager service. We're going to use a *singleton* pattern.  This is a design pattern that states there will only ever (at runtime) be one of this object. But we'll use an object, rather than static methods on a class because if we wanted to write some tests, we might want to give other services a pretend user management service rather than the real thing to make the tests easier to write.
-
-As this service will always be present, we'll create the instance immediately and put it in a static field. So we'll use a slightly simplified form of the singleton pattern for this.
-
-As we're not dealing with a database yet, you'll need to store some data in memory -- for example a map of user ids to users. For the moment, I recommend using `java.util.concurrent.ConcurrentHashMap`.
-
-```java
-public class UserService {
-
-    public static final UserService instance = new UserService();
-    
-    // You'll need a datastructure for storing your registered users...
-
-    public User registerUser(User u) {
-      // implement this; don't forget to check one with this email doesn't already exist
-    }
-
-    public User getUser(String id) {
-      // implement this
-    }
-    
-    public User getUser(String email, String password) {
-      // implement this
-    }
-
-
-
-}
-
-```
-
-### Create an (empty) controller
-
-Now that we have some core functionality written, let's wire it up to forms and HTTP controller methods.
-
-Create a `UserController` in your app's `controllers` package, and give this controller a protected static method to get the UserService instance.
-
-### Create login and register views
-
-In your app's views, create `login.scala.html` and `register.scala.html`. They each take one String parameter, for an error message, so at the top of the templates put `@(error:String)`. 
-
-Then code up HTML forms that post to actions called `login` and `register`, with the email address and password. 
-
-After the input fields, but before the submit button, put the error message, inside an if construct. eg:
+The first step has already been done for you -- adding the database driver to the dependencies in `build.sbt`
 
 ```scala
-@if(error != null) {
-  <div>@error</div>
+libraryDependencies ++= Seq(
+  "org.mindrot" % "jbcrypt" % "0.3m",
+  "org.mongodb" % "mongodb-driver" % "3.0.2"
+)
+```
+
+### Connecting to the database
+
+In `UserService.java`, we make a connection to the database. In this case, we've hardcoded the connection string, but
+normally we would look this up from a configuration variable (which in turn usually looks up an environment variable)
+
+```java
+protected MongoClient mongoClient;
+protected UserService() {
+    mongoClient = new MongoClient("127.0.0.1", 27017);
 }
 ```
 
-### Create routing entries
-
-In `conf/routes`, create routing entries that will accept `POST`s to `/login` and `/register`, and call `controllers.UserController.doLogin()` and `controllers.UserController.doRegister()`. Note these methods take no parameters -- the data is in the body of the request.
-
-Also create routing entries that will accept `GET`s to `/login` and `/register` and call `controllers.UserController.loginForm()` and `controllers.UserController.registerForm()`. These are the routing entries for showing the form pages.
-
-### Create the controller methods
-
-We now need to create the controller methods.
-
-As Play compiles the templates when a request comes in, I tend to recommend first writing the method definitions, just getting them to return `ok("Not implemented yet")`. Then start the server and make a web request to it. This will trigger Play to recompile the templates. Then in IntelliJ, from the SBT tab, click the refresh icon, so that IntelliJ will now be able to "see" your compiled templates. (Otherwise the IDE can't see the compiled template classes to know that you can call them, and it shows spurious red errors.)
-
-Create the four controller methods you need, and wire them up to your user service. You will also need a way of turning a password into a hash. There is sample code for this in the `model.BCrypt` class.
-
-But, we need a way in the user management service to record the user's logged in sessions...
-
-### Add a session class
-
-Let's create a domain class for sessions.
-
-Something like
+We've also added a protected method for accessing your database; you should change the name of the database you access
+to `comp391_username`, where `username` is your username on turing.
 
 ```java
-public class Session() {
-  String id;
-  String ipAddress;
-  long since;
-  
-  public Session(String ipAddress) {
-    this.id = java.util.UUID.randomUUID().tostring();
-    this.since = System.currentTimeMillis();
-    this.ipAddress = ipAddress;
-  }
-  
-  public String getIpAddress() {
-    return this.ipAddress;
-  }
-  
-  public long getSince() {
-    return this.since;
-  }  
-  
+protected MongoDatabase getDB() {
+    // TODO: Change your database name, to avoid clashing with others on turing
+    return mongoClient.getDatabase("comp391_yourusername");
 }
-
 ```
 
-Add a hashmap of session IDs to sessions to your `User` class. This is where we'll store the user's active sessions.
-
-### Getting the session from the request
-
-We'll store the user's current session ID in a cookie. Particularly, we'll store it as a variable in Play's existing "session" cookie.
-
-Define a method `getSessionId()` on the User Controller that will extract the user's session ID if it is set, and set it if it isn't
-
-eg 
+I've then written a protected method that uses this to get the `chitterUser` collection.
 
 ```java
-public final static String sessionVar = "MY_SESSION"
+protected MongoCollection<Document> getChitterCollection() {
+    return getDB().getCollection("chitterUser");
+}
+```
+
+### Serialising to BSON
+
+The next thing we need is a method that can translate the `User` class to BSON and back, to save it in the database.
+I recommend changing how the ID is allocated -- at the moment, we've allocated a Java UUID and stored it as a String in
+the ID field. If instead, you generate BSON ObjectIDs, you should still be able to hold them as Strings in Java, but they
+will be convertible to ObjectIds to store in the database.
+
+(If you're stuck, peek at the solution!)
+
+Note that to save `User`s, you will also need to be able to translate `Session` objects to BSON and back.
+
+You're going to need to implement these. The [Java Driver Quick Tour](http://mongodb.github.io/mongo-java-driver/3.0/driver/getting-started/quick-tour/)
+has examples for you.
+ 
+```java
+protected static Document userToBson(User u) {
+    // TODO: You need to implement this
+    Document d = new Document();
+    throw new NotImplementedException();
+}
 ```
 
 ```java
-  String id = session(sessionVar);
-  if (id == null) {
-    id = java.util.UUID.randomUUID().toString();
-    session(sessionVar, id);
-  } 
-  return id;
+protected static User userFromBson(Document d) {
+    // TODO: You need to implement this
+    throw new NotImplementedException();
+}
 ```
 
-We can now get the user's session ID from any request.
+### Saving users
 
-### Add a method to your UserService
+Once you can serialise Users, you can save them. I recommend starting with changing the `UserService.registerUser`
+method -- change it to save the user in the database. Then try it, and using `mongo` at the command line, check that
+the user really turned up in the database
 
-Add a method `getUserFromSession(String sessionId)` to your user service, to find which user (if any) is logged in with this session Id.
+```bash
+use "comp391_username"
+db.chitterUser.find()
+```
 
-For the moment, just iterate through the users until you either find the right one, or reach the end of the users.
+### Migrating the rest to MongoDB
 
+Now that you've done this, you should migrate the rest of the `UserService` class to use the database instead of an
+in-memory data structure.
 
-### Add behaviour to your controllers
-
-* `doRegister`, if it is successful, creates a new user. But it might give an error that the user is already registered.
-
-* `doLogin`, if it is successful, pushes the user's session into the user record (and pulls it from any other user record it is in). But it might give an error that the password was incorrect.
-
-### Extension -- remote logout
-
-Now that we have a user's sessions recorded against the user, we can produce a view that shows a list of the user's sessions, with a button to log each of them out.
-
+One you're done, check that you can still log in, log out, and remote log out.
