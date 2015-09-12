@@ -115,3 +115,17 @@ So, you're going to need to put a method into `UserService` that pushes a `Sessi
 This could work by pushing it into the `User` Java object, and then calling `UserService.update` to save the object. Or
 you could do an update query directly on the database entry.
 
+### A note with the solution
+
+To keep things simple for students who might not have much programming experience, I implemented the login/logout using
+a call to save. Actually, though, I don't recommend you do this.
+
+The web is a parallel environment -- you could have multiple calls happening on the same objects on different threads.
+If each of those calls overwrites *the whole record*, then you can find that you can lose data -- one request treads on
+the data from another.
+
+Generally, I recommend using the update operations, such as `$push` and `$addToSet` for pushing sessions into users, as
+these do not write the whole record. My rule of thumb is "always perform the smallest write possible".
+
+And ideally, change the settings in the driver so that you only return when the data has been written, not just when the
+driver has sent the update request to the database.
