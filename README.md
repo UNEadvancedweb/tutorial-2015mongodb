@@ -125,7 +125,7 @@ If each of those calls overwrites *the whole record*, then you can find that you
 the data from another.
 
 Generally, I recommend using the update operations, such as `$push` and `$addToSet` for pushing sessions into users, as
-these do not write the whole record. My rule of thumb is "always perform the smallest write possible".
+these do not write the whole record. 
 
 And ideally, change the settings in the driver so that you only return when the data has been written, not just when the
 driver has sent the update request to the database.
